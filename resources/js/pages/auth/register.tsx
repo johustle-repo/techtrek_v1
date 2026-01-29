@@ -35,7 +35,7 @@ export default function Register() {
                         disableWhileProcessing
                         className="flex flex-col gap-5"
                         action='/register'
-                        method="post"
+                        method="get"
                     >
                         {({ processing, errors }) => (
                             <>
