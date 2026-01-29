@@ -2,33 +2,48 @@
 FROM node:20-alpine as build-assets
 WORKDIR /app
 
-# 1. ✅ MAGDAGDAG NG PHP DITO (Kailangan ng vite-plugin-wayfinder)
-RUN apk add --no-cache php82 php82-common php82-ctype php82-fileinfo php82-mbstring php82-openssl php82-phar php82-session php82-tokenizer php82-xml php82-xmlwriter php82-dom php82-xmlreader php82-posix php82-intl php82-curl php82-zip php82-pdo php82-pdo_mysql php82-bcmath
+# ✅ Fixed: Ginamit ang generic 'php83' o 'php82' dependencies na available sa standard Alpine
+RUN apk add --no-cache \
+    php83 \
+    php83-common \
+    php83-ctype \
+    php83-fileinfo \
+    php83-mbstring \
+    php83-openssl \
+    php83-phar \
+    php83-session \
+    php83-tokenizer \
+    php83-xml \
+    php83-xmlwriter \
+    php83-dom \
+    php83-xmlreader \
+    php83-posix \
+    php83-intl \
+    php83-curl \
+    php83-zip \
+    php83-pdo \
+    php83-pdo_mysql \
+    php83-bcmath
 
-# Gawaing 'php' ang command name (compatibility)
-RUN ln -sf /usr/bin/php82 /usr/bin/php
+# Siguraduhin na 'php' ang command name
+RUN ln -sf /usr/bin/php83 /usr/bin/php
 
 COPY package*.json ./
 RUN npm ci 
 COPY . .
 
-# 2. ✅ Ngayon, gagana na ang build dahil may 'php' na sa environment
+# Ngayon, gagana na ang wayfinder plugin dahil may PHP na
 RUN npm run build
 
-# Stage 2: PHP Environment with Nginx (Mananatili itong pareho)
+# Stage 2: PHP Environment (Mananatili itong pareho)
 FROM php:8.2-fpm-alpine
 WORKDIR /var/www/html
-
 RUN apk add --no-cache nginx wget libpng-dev libxml2-dev zip unzip
 RUN docker-php-ext-install pdo pdo_mysql gd bcmath
-
 COPY . .
 COPY --from=build-assets /app/public /var/www/html/public
-
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev --optimize-autoloader
-
 COPY ./docker/nginx.conf /etc/nginx/nginx.conf
-
 EXPOSE 80
 CMD nginx && php-fpm
