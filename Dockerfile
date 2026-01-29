@@ -1,40 +1,38 @@
 # Stage 1: Build React/Vite Assets
-FROM node:20-alpine as build-assets
+# Nagsimula tayo sa PHP image para siguradong may PHP command
+FROM php:8.2-fpm-alpine as build-assets
 WORKDIR /app
 
-# 1. Install PHP essentials (Clean and simple)
-RUN apk add --no-cache php83 php83-ctype php83-fileinfo php83-mbstring php83-openssl php83-phar php83-tokenizer php83-xml php83-dom php83-xmlwriter php83-curl php83-zip
-RUN ln -sf /usr/bin/php83 /usr/bin/php
+# 1. Install Node.js at system tools
+RUN apk add --no-cache nodejs npm libpng-dev libxml2-dev zip unzip git
 
-# 2. Copy dependency files first
-COPY package*.json ./
-RUN npm ci 
+# 2. Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# 3. Copy everything else
+# 3. Copy files at install dependencies
 COPY . .
+RUN composer install --no-dev --optimize-autoloader
+RUN npm ci
 
-# 4. Create a dummy .env file to prevent Laravel errors during Vite build
-# Ito ang magsasabi sa Laravel na huwag maghanap ng database sa build stage
-RUN echo "APP_KEY=base64:$(node -e 'console.log(require("crypto").randomBytes(32).toString("base64"))')" > .env && \
-    echo "DB_CONNECTION=sqlite" >> .env && \
-    echo "DB_DATABASE=:memory:" >> .env
+# 4. Mag-generate ng APP_KEY para hindi mag-error ang Artisan
+RUN cp .env.example .env && php artisan key:generate
 
-# 5. Compile assets
+# 5. Compile assets (Dito na papasok ang fix para sa wayfinder)
 RUN npm run build
 
-# --- Stage 2: Final Runtime ---
+# --- Stage 2: Final Production Image ---
 FROM php:8.2-fpm-alpine
 WORKDIR /var/www/html
 
-# Install runtime dependencies
-RUN apk add --no-cache nginx wget libpng-dev libxml2-dev zip unzip
+# Install runtime tools
+RUN apk add --no-cache nginx libpng-dev libxml2-dev zip unzip
 RUN docker-php-ext-install pdo pdo_mysql gd bcmath
 
-# Copy project files from source and build assets from Stage 1
+# Copy project at yung compiled assets mula sa Stage 1
 COPY . .
 COPY --from=build-assets /app/public /var/www/html/public
 
-# Install Composer dependencies
+# Final cleanup install
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev --optimize-autoloader
 
