@@ -11,11 +11,11 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # 3. Copy files at install dependencies
 COPY . .
 
-# Install dependencies (Ignore platform reqs para sa build stage)
+# Install dependencies
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 RUN npm ci
 
-# 4. Mag-generate ng APP_KEY para sa Artisan (Required ng Wayfinder)
+# 4. Mag-generate ng APP_KEY para sa Artisan
 RUN cp .env.example .env && php artisan key:generate
 
 # 5. Compile assets
@@ -36,12 +36,10 @@ COPY . .
 COPY --from=build-assets /app/public /var/www/html/public
 
 # 6. ✅ FIX: Permission Denied Error
-# I-set ang owner sa www-data (ang user na gamit ng PHP-FPM)
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-# I-set ang tamang folder permissions
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 7. Final Composer install para sa production environment
+# 7. Final Composer install
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
@@ -50,5 +48,6 @@ COPY ./docker/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 
-# Siguraduhin na ang nginx at php-fpm ay tatakbo nang sabay
-CMD nginx && php-fpm
+# ✅ FINAL FIX: Auto-migration at Startup
+# Ito ang magpapatakbo ng database tables mo sa Clever Cloud bago bumukas ang site.
+CMD php artisan migrate --force && php-fpm -D && nginx -g 'daemon off;'
