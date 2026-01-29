@@ -34,6 +34,8 @@ export default function Register() {
                         resetOnSuccess={['password', 'password_confirmation']}
                         disableWhileProcessing
                         className="flex flex-col gap-5"
+                        href='/register'
+                        method="post"
                     >
                         {({ processing, errors }) => (
                             <>

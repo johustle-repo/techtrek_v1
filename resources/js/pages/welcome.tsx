@@ -58,6 +58,7 @@ export default function Welcome({
                                     <Link
                                         // FIX 2: Use direct string '/login'
                                         href="/login"
+                                        method="post"
                                         className="text-sm font-semibold text-white transition hover:text-blue-300"
                                     >
                                         Log in
@@ -66,6 +67,7 @@ export default function Welcome({
                                         <Link
                                             // FIX 3: Use direct string '/register'
                                             href="/register"
+                                            method="post"
                                             className="rounded-full bg-blue-600 px-6 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 shadow-lg"
                                         >
                                             Register

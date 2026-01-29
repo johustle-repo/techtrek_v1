@@ -11,11 +11,11 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # 3. Copy files at install dependencies
 COPY . .
 
-# Install dependencies
+# Install dependencies (Ignore platform reqs para sa build stage)
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 RUN npm ci
 
-# 4. Mag-generate ng APP_KEY para sa Artisan
+# 4. Mag-generate ng APP_KEY para sa Artisan (Required ng Wayfinder)
 RUN cp .env.example .env && php artisan key:generate
 
 # 5. Compile assets
@@ -48,6 +48,6 @@ COPY ./docker/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 
-# ✅ FINAL FIX: Auto-migration at Startup
-# Ito ang magpapatakbo ng database tables mo sa Clever Cloud bago bumukas ang site.
-CMD php artisan migrate --force && php-fpm -D && nginx -g 'daemon off;'
+# ✅ FINAL FIX: Auto-migration at Auto-Seeding
+# Idinagdag natin ang '--seed' para kusa nang magawa ang Admin at Staff accounts mo.
+CMD php artisan migrate --force --seed && php-fpm -D && nginx -g 'daemon off;'

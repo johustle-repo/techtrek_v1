@@ -9,8 +9,8 @@ import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
-import { Compass, Eye, EyeOff } from 'lucide-react'; // ✅ Added Eye icons
-import { useState } from 'react'; // ✅ Added useState
+import { Compass, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
 
 type Props = {
     status?: string;
@@ -19,7 +19,6 @@ type Props = {
 };
 
 export default function Login({ status, canResetPassword, canRegister }: Props) {
-    // ✅ State for password visibility
     const [showPassword, setShowPassword] = useState(false);
 
     return (
@@ -66,10 +65,18 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                         <p className="text-sm font-medium text-slate-500">
                             Enter your credentials to access your portal.
                         </p>
+                        {status && (
+                            <div className="mb-4 text-sm font-medium text-green-600">
+                                {status}
+                            </div>
+                        )}
                     </div>
 
+                    {/* ✅ FIXED: Added route="login" and method="post" */}
                     <Form
                         {...store.form()}
+                        href="/login" 
+                        method="post"
                         resetOnSuccess={['password']}
                         className="flex flex-col gap-6"
                     >
@@ -83,13 +90,13 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                                             type="email"
                                             name="email"
                                             required
+                                            autoComplete="username"
                                             className="h-12 border-slate-200 bg-slate-50/50 rounded-lg focus:ring-blue-600"
                                             placeholder="you@example.com"
                                         />
                                         <InputError message={errors.email} />
                                     </div>
 
-                                    {/* ✅ Updated Password Field with Toggle */}
                                     <div className="grid gap-2">
                                         <div className="flex items-center justify-between">
                                             <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password</Label>
@@ -105,6 +112,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                                                 type={showPassword ? 'text' : 'password'}
                                                 name="password"
                                                 required
+                                                autoComplete="current-password"
                                                 className="h-12 border-slate-200 bg-slate-50/50 rounded-lg focus:ring-blue-600 pr-10"
                                                 placeholder="••••••••"
                                             />
