@@ -25,5 +25,9 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('Password-123'),
             'role' => 'staff',
         ]);
+
+        $this->call([
+            AttractionSeeder::class,
+        ]);
     }
 }
