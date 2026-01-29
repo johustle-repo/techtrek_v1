@@ -10,22 +10,29 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 🛡️ Gagawa ng Admin Account
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@techtrek.com',
-            'password' => Hash::make('Password-123'), // Palitan mo ito sa production
-            'role' => 'admin',
-        ]);
+        // ✅ Gagamit ng updateOrCreate para hindi mag-error kung existing na ang email
+        
+        // 🛡️ Admin Account
+        User::updateOrCreate(
+            ['email' => 'admin@techtrek.com'], // Ito ang titingnan kung existing na
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('Password-123'),
+                'role' => 'admin',
+            ]
+        );
 
-        // 🛠️ Gagawa ng Staff Account
-        User::create([
-            'name' => 'Labrador Staff',
-            'email' => 'staff@techtrek.com',
-            'password' => Hash::make('Password-123'),
-            'role' => 'staff',
-        ]);
+        // 🛠️ Staff Account
+        User::updateOrCreate(
+            ['email' => 'staff@techtrek.com'],
+            [
+                'name' => 'Labrador Staff',
+                'password' => Hash::make('Password-123'),
+                'role' => 'staff',
+            ]
+        );
 
+        // ✅ Tatawagin ang iyong AttractionSeeder
         $this->call([
             AttractionSeeder::class,
         ]);

@@ -11,11 +11,11 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # 3. Copy files at install dependencies
 COPY . .
 
-# Install dependencies (Ignore platform reqs para sa build stage)
+# Install dependencies
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 RUN npm ci
 
-# 4. Mag-generate ng APP_KEY para sa Artisan (Required ng Wayfinder)
+# 4. Mag-generate ng APP_KEY para sa Artisan
 RUN cp .env.example .env && php artisan key:generate
 
 # 5. Compile assets
@@ -35,7 +35,7 @@ COPY . .
 # Kopyahin ang compiled assets mula sa Stage 1
 COPY --from=build-assets /app/public /var/www/html/public
 
-# 6. ✅ FIX: Permission Denied Error
+# 6. ✅ Permission Fixes (Sinisiguro na walang 500 errors)
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
@@ -48,6 +48,5 @@ COPY ./docker/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 
-# ✅ FINAL FIX: Auto-migration at Auto-Seeding
-# Idinagdag natin ang '--seed' para kusa nang magawa ang Admin at Staff accounts mo.
-CMD php artisan migrate --force --seed && php-fpm -D && nginx -g 'daemon off;'
+# ✅ FINAL CMD: Inalis na ang --seed dahil may data na ang DB mo
+CMD php artisan migrate --force && php-fpm -D && nginx -g 'daemon off;'
