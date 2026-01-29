@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
+
+class Business extends Model
+{
+    /** @use HasFactory<\Database\Factories\BusinessFactory> */
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'name', 'slug', 'category', 'description', 
+        'address', 'contact_number', 'image_url', 'status'
+    ];
+}
