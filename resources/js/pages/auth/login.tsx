@@ -75,8 +75,8 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                     {/* ✅ FIXED: Added route="login" and method="post" */}
                     <Form
                         {...store.form()}
-                        action='login'
-                        method="get"
+                        href='login'
+                        // method="get"
                         resetOnSuccess={['password']}
                         className="flex flex-col gap-6"
                     >
